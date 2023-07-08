@@ -1,0 +1,5 @@
+langchain==0.0.227
+openai==0.27.8
+argparse==1.4.0
+python-dotenv==1.0.0
+urllib3==1.26.6

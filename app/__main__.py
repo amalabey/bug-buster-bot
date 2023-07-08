@@ -3,8 +3,12 @@ from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 from app.test_changeset_provider import TestChangesetProvider
-from langchain.prompts import PromptTemplate
-
+from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain.schema import HumanMessage, SystemMessage
+from app.models import MethodInfo, Methods
+from langchain.chains.openai_functions import (
+    create_openai_fn_chain, create_structured_output_chain
+)
 
 load_dotenv(".env")
 load_dotenv(".env.local", override=True)
@@ -13,22 +17,19 @@ changeset_provider = TestChangesetProvider()
 changesets = changeset_provider.get_changesets(None)
 file, diff = list(changesets.items())[0]
 
-prompt = PromptTemplate(
-    input_variables=['lang', 'code'],
-    template='''
-    You are a senior {lang} Developer and a seasoned professional responsible 
-    for evaluating and providing feedback on code written by other developers. 
-    You possess deep knowledge of {lang} and its best practices, design patterns, 
-    and software development principles. You also have extensive experience 
-    in writing secure code. I would like you to review code written by 
-    junior developer to ensure it is secure, performant, maintainable 
-    and follows {lang} best practices.
-    {code}
-    ''')
+prompt_msgs = [
+        SystemMessage(
+            content='You are a helpful assistant that understands {lang} programming language format and structure.'
+        ),
+        HumanMessage(content="List method/function names in the following code with corresponding start and end line numbers"),
+        HumanMessagePromptTemplate.from_template("{code}"),
+        HumanMessage(content="Tips: Make sure to answer in the correct format")
+    ]
+prompt = ChatPromptTemplate(messages=prompt_msgs)
 
-# llm = OpenAI(temperature=0.0)
-llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.0)
+llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.7)
 
-chain = LLMChain(llm=llm, prompt=prompt, verbose=True)
+chain = create_structured_output_chain(Methods, llm, prompt, verbose=True)
 result = chain.run(lang='C#', code=diff)
+
 print(result)

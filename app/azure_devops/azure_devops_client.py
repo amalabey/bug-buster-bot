@@ -12,7 +12,7 @@ class AzureDevOpsClient():
             self.personal_access_token = from_env_var
 
     def send_api_request(self, url, method="GET",
-                         data=None, raiseOnErr=True):
+                         data=None, raiseOnErr=True, raw_data=False):
         header_value = f":{self.personal_access_token}"
         header_bytes = header_value.encode('utf-8')
         basic_auth_header_bytes = base64.b64encode(header_bytes)
@@ -25,4 +25,8 @@ class AzureDevOpsClient():
         response = requests.request(method, url, headers=headers, data=data)
         if raiseOnErr:
             response.raise_for_status()
-        return response.json()
+
+        if raw_data:
+            return response.text
+        else:
+            return response.json()

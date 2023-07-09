@@ -14,6 +14,7 @@ load_dotenv(".env.local", override=True)
 
 test = AzureRepoPullRequestChangesetProvider("amalzpd", "eShopOnWeb")
 res = test.get_changesets("38")
+print(res)
 
 # changeset_provider = TestChangesetProvider()
 # changesets = changeset_provider.get_changesets(None)

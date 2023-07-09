@@ -31,5 +31,21 @@ class AzureRepoPullRequestChangesetProvider(ChangesetProvider):
     def get_changesets(self, pull_request_id: str) -> list[ChangeSet]:
         api_client = AzureDevOpsClient()
         source, target = self._get_pr_branches(api_client, pull_request_id)
-        for file_path, file_url, is_new in self._get_pr_diff(api_client, source, target):
-            print(f"{file_path}, {file_url}, {is_new}\n")
+        changesets = list()
+        for file_path, file_url, is_new in self._get_pr_diff(api_client,
+                                                             source, target):
+            file_contents = api_client.send_api_request(file_url, "GET",
+                                                        raw_data=True)
+            if not is_new:
+                target_file_url = f"https://dev.azure.com/{self.org}/{self.project_name}/_apis/git/repositories/{self.repo_name}/items?path={file_path}&versionDescriptor.version={target}&api-version=6.0"
+                target_file_contents = api_client.send_api_request(
+                    target_file_url, "GET", raw_data=True)
+                changed_line_nums = self.get_changed_lines(
+                    target_file_contents, file_contents)
+            else:
+                changed_line_nums = list()
+            changeset = ChangeSet(path=file_path, contents=file_contents,
+                                  changed_line_nums=changed_line_nums,
+                                  is_new_file=is_new)
+            changesets.append(changeset)
+        return changesets

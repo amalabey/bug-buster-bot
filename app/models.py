@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Sequence
+from typing import Optional, Sequence
 
 
 class MethodInfo(BaseModel):
@@ -18,5 +18,17 @@ class ChangeSet(BaseModel):
     """Represents code file changes"""
     path: str = Field(..., description="Repository relative path to the code file")
     contents: str = Field(..., description="Code file contents to be reviewed")
-    changed_line_nums: list[int] = Field(..., description="List of line numbers that were changed")
     is_new_file: bool = Field(..., description="Was this file newly added")
+    original_contents: Optional[str] = Field(default=None, description="Was this file newly added")
+
+
+class SemanticChangeSet(ChangeSet):
+    """Represents a reviewable code changes"""
+    changed_methods: list[MethodInfo] = Field(..., description="List of methods to be reviewed")
+
+    @classmethod
+    def from_changeset(cls, changeset: ChangeSet, methods: list[MethodInfo]):
+        return SemanticChangeSet(path=changeset.pathk,
+                                 contents=changeset.contents,
+                                 is_new_file=changeset.is_new_file,
+                                 changed_methods=methods)

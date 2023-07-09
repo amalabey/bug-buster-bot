@@ -5,7 +5,8 @@ from app.azure_devops.azure_devops_client import AzureDevOpsClient
 
 
 class AzureRepoPullRequestChangesetProvider(ChangesetProvider):
-    def __init__(self, org: str, project_name: str, repo_name=None) -> None:
+    def __init__(self, org: str,
+                 project_name: str, repo_name=None) -> None:
         super().__init__()
         self.org = org
         self.project_name = project_name
@@ -40,12 +41,8 @@ class AzureRepoPullRequestChangesetProvider(ChangesetProvider):
                 target_file_url = f"https://dev.azure.com/{self.org}/{self.project_name}/_apis/git/repositories/{self.repo_name}/items?path={file_path}&versionDescriptor.version={target}&api-version=6.0"
                 target_file_contents = api_client.send_api_request(
                     target_file_url, "GET", raw_data=True)
-                changed_line_nums = self.get_changed_lines(
-                    target_file_contents, file_contents)
-            else:
-                changed_line_nums = list()
             changeset = ChangeSet(path=file_path, contents=file_contents,
-                                  changed_line_nums=changed_line_nums,
+                                  original_contents=target_file_contents,
                                   is_new_file=is_new)
             changesets.append(changeset)
         return changesets

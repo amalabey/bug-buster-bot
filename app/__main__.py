@@ -7,27 +7,31 @@ from app.models import Methods
 from langchain.chains.openai_functions import (
     create_openai_fn_chain, create_structured_output_chain
 )
+from app.azure_devops.azure_repo_changeset_provider import AzureRepoPullRequestChangesetProvider
 
 load_dotenv(".env")
 load_dotenv(".env.local", override=True)
 
-changeset_provider = TestChangesetProvider()
-changesets = changeset_provider.get_changesets(None)
-file, diff = list(changesets.items())[0]
+test = AzureRepoPullRequestChangesetProvider("amalzpd", "eShopOnWeb")
+res = test.get_changesets("38")
 
-prompt_msgs = [
-        SystemMessage(
-            content='You are a helpful assistant that understands C# programming language format and structure.'
-        ),
-        HumanMessage(content="List method/function names in the following code with corresponding starting and end line numbers"),
-        HumanMessagePromptTemplate.from_template("{code}"),
-        HumanMessage(content="Tips: Make sure to answer in the correct format")
-    ]
-prompt = ChatPromptTemplate(messages=prompt_msgs)
+# changeset_provider = TestChangesetProvider()
+# changesets = changeset_provider.get_changesets(None)
+# file, diff = list(changesets.items())[0]
 
-llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.0)
+# prompt_msgs = [
+#         SystemMessage(
+#             content='You are a helpful assistant that understands C# programming language format and structure.'
+#         ),
+#         HumanMessage(content="List method/function names in the following code with corresponding starting and end line numbers"),
+#         HumanMessagePromptTemplate.from_template("{code}"),
+#         HumanMessage(content="Tips: Make sure to answer in the correct format")
+#     ]
+# prompt = ChatPromptTemplate(messages=prompt_msgs)
 
-chain = create_structured_output_chain(Methods, llm, prompt, verbose=True)
-result = chain.run(lang='C#', code=diff)
+# llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.0)
 
-print(result)
+# chain = create_structured_output_chain(Methods, llm, prompt, verbose=True)
+# result = chain.run(lang='C#', code=diff)
+
+# print(result)

@@ -12,3 +12,11 @@ class MethodInfo(BaseModel):
 class Methods(BaseModel):
     """List of methods/functions in a given code file"""
     methods: Sequence[MethodInfo] = Field(..., description="List of methods")
+
+
+class ChangeSet(BaseModel):
+    """Represents code file changes"""
+    path: str = Field(..., description="Repository relative path to the code file")
+    contents: int = Field(..., description="Code file contents to be reviewed")
+    changed_line_nums: int = Field(..., description="List of line numbers that were changed")
+    is_new_file: bool = Field(..., description="Was this file newly added")

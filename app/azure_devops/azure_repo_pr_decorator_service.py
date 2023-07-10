@@ -37,11 +37,7 @@ class AzureRepoPullRequestDecoratorService(PullRequestDecoratorService):
                             }
                         },
                         "pullRequestThreadContext": {
-                            "changeTrackingId": 1,
-                            "iterationContext": {
-                                "firstComparingIteration": 1,
-                                "secondComparingIteration": 2
-                            }
+                            "changeTrackingId": 0
                         }
                     })
         return payload

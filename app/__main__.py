@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
+from app.openai_method_provider import OpenAiMethodProvider
+from app.semantic_changeset_provider import SemanticChangesetProvider
 from app.test_changeset_provider import TestChangesetProvider
 from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain.schema import HumanMessage, SystemMessage
@@ -12,8 +14,10 @@ from app.azure_devops.azure_repo_changeset_provider import AzureRepoPullRequestC
 load_dotenv(".env")
 load_dotenv(".env.local", override=True)
 
-test = AzureRepoPullRequestChangesetProvider("amalzpd", "eShopOnWeb")
-res = test.get_changesets("38")
+pr_change_provider = AzureRepoPullRequestChangesetProvider("amalzpd", "eShopOnWeb")
+method_provider = OpenAiMethodProvider()
+changeset_provider = SemanticChangesetProvider(pr_change_provider, method_provider)
+res = changeset_provider.get_changesets("38")
 print(res)
 
 # changeset_provider = TestChangesetProvider()

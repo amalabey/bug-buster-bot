@@ -3,6 +3,7 @@ from typing import Iterator
 from app.changeset_provider import ChangesetProvider
 from app.method_provider import MethodProvider
 from app.models import MethodInfo, SemanticChangeSet
+from app.utils import detect_lang
 
 
 class SemanticChangesetProvider:
@@ -13,7 +14,7 @@ class SemanticChangesetProvider:
 
     def _get_changed_lines(self, source: str, target: str) -> Iterator[int]:
         differ = Differ()
-        diffs = differ.compare(source, target)
+        diffs = differ.compare(source.splitlines(True), target.splitlines(True))
         lineNum = 0
         for line in diffs:
             code = line[:2]
@@ -31,8 +32,9 @@ class SemanticChangesetProvider:
                 blockStart = changed_line_num
                 continue
             elif changed_line_num > index:
-                yield (blockStart, index)
-                index = changed_line_num
+                yield (blockStart, changed_line_num)
+                blockStart = 0
+            index = changed_line_num
         if blockStart > 0:
             yield (blockStart, index)
 
@@ -47,7 +49,8 @@ class SemanticChangesetProvider:
         semantic_changesets = list()
         changesets = self.changeset_provider.get_changesets(pull_request_id)
         for changeset in changesets:
-            methods = self.method_provider.get_methods(changeset.contents)
+            lang = detect_lang(changeset.path)
+            methods = self.method_provider.get_methods(lang, changeset.contents).methods
             if changeset.is_new_file:
                 semantic_changesets.append(
                     SemanticChangeSet.from_changeset(changeset, methods))

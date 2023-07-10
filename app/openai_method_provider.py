@@ -30,4 +30,4 @@ class OpenAiMethodProvider(MethodProvider):
         chain = create_structured_output_chain(Methods, llm, prompt,
                                                verbose=True)
         result = chain.run(code=code_with_line_numbers)
-        return Methods.parse_raw(result)
+        return Methods.parse_obj(result)

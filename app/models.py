@@ -8,6 +8,12 @@ class MethodInfo(BaseModel):
     startLine: int = Field(..., description="The start line of the function/method in the given code file")
     endLine: int = Field(..., description="The end line of the function/method in the given code file")
 
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other):
+        return self.name == other.name
+
 
 class Methods(BaseModel):
     """List of methods/functions in a given code file"""
@@ -28,7 +34,7 @@ class SemanticChangeSet(ChangeSet):
 
     @classmethod
     def from_changeset(cls, changeset: ChangeSet, methods: list[MethodInfo]):
-        return SemanticChangeSet(path=changeset.pathk,
+        return SemanticChangeSet(path=changeset.path,
                                  contents=changeset.contents,
                                  is_new_file=changeset.is_new_file,
                                  changed_methods=methods)

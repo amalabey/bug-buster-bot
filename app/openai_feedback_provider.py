@@ -1,6 +1,6 @@
 from typing import Tuple
 from app.feedback_provider import FeedbackProvider
-from app.models import MethodInfo, ReviewComment, ReviewCommentCollection, SemanticChangeSet
+from app.models import MethodInfo, ReviewCommentCollection, SemanticChangeSet
 from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain.schema import HumanMessage, SystemMessage
 from langchain.chat_models import ChatOpenAI

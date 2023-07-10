@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
+from app.openai_feedback_provider import OpenAiFeedbackProvider
 from app.openai_method_provider import OpenAiMethodProvider
 from app.semantic_changeset_provider import SemanticChangesetProvider
 from app.test_changeset_provider import TestChangesetProvider
@@ -17,26 +18,9 @@ load_dotenv(".env.local", override=True)
 pr_change_provider = AzureRepoPullRequestChangesetProvider("amalzpd", "eShopOnWeb")
 method_provider = OpenAiMethodProvider()
 changeset_provider = SemanticChangesetProvider(pr_change_provider, method_provider)
-res = changeset_provider.get_changesets("38")
-print(res)
+changesets = changeset_provider.get_changesets("38")
 
-# changeset_provider = TestChangesetProvider()
-# changesets = changeset_provider.get_changesets(None)
-# file, diff = list(changesets.items())[0]
-
-# prompt_msgs = [
-#         SystemMessage(
-#             content='You are a helpful assistant that understands C# programming language format and structure.'
-#         ),
-#         HumanMessage(content="List method/function names in the following code with corresponding starting and end line numbers"),
-#         HumanMessagePromptTemplate.from_template("{code}"),
-#         HumanMessage(content="Tips: Make sure to answer in the correct format")
-#     ]
-# prompt = ChatPromptTemplate(messages=prompt_msgs)
-
-# llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.0)
-
-# chain = create_structured_output_chain(Methods, llm, prompt, verbose=True)
-# result = chain.run(lang='C#', code=diff)
-
-# print(result)
+feedback_provider = OpenAiFeedbackProvider()
+for changeset in changesets:
+    review_comments = feedback_provider.get_review_comments(changeset)
+    print(review_comments)

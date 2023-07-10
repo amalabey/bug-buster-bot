@@ -53,12 +53,12 @@ class SemanticChangesetProvider:
             methods = self.method_provider.get_methods(lang, changeset.contents).methods
             if changeset.is_new_file:
                 semantic_changesets.append(
-                    SemanticChangeSet.from_changeset(changeset, methods))
+                    SemanticChangeSet.from_changeset(changeset, methods, lang))
             else:
                 changed_methods = self._get_changed_methods(
                     changeset.original_contents,
                     changeset.contents,
                     methods)
                 semantic_changesets.append(
-                    SemanticChangeSet.from_changeset(changeset, changed_methods))
+                    SemanticChangeSet.from_changeset(changeset, changed_methods, lang))
         return semantic_changesets

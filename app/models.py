@@ -31,10 +31,23 @@ class ChangeSet(BaseModel):
 class SemanticChangeSet(ChangeSet):
     """Represents a reviewable code changes"""
     changed_methods: list[MethodInfo] = Field(..., description="List of methods to be reviewed")
+    lang: str = Field(..., description="Programming language used")
 
     @classmethod
-    def from_changeset(cls, changeset: ChangeSet, methods: list[MethodInfo]):
+    def from_changeset(cls, changeset: ChangeSet, methods: list[MethodInfo], lang: str):
         return SemanticChangeSet(path=changeset.path,
                                  contents=changeset.contents,
                                  is_new_file=changeset.is_new_file,
-                                 changed_methods=methods)
+                                 changed_methods=methods,
+                                 lang=lang)
+
+
+class ReviewComment(BaseModel):
+    """Represents a code review comment"""
+    feedback: str = Field(..., description="Feedback comment for the given code")
+    example: Optional[str] = Field(..., description="Example code in markdown format as a suggestion")
+
+
+class ReviewCommentCollection(BaseModel):
+    """Collection of code review comments for a given method"""
+    comments: list[ReviewComment] = Field(..., description="List of review comments")

@@ -1,8 +1,8 @@
 import argparse
 from dotenv import load_dotenv
 from app.azure_devops.azure_repo_pr_decorator_service import AzureRepoPullRequestDecoratorService
-from app.openai_feedback_provider import OpenAiFeedbackProvider
-from app.openai_method_provider import OpenAiMethodProvider
+from app.openai.openai_feedback_provider import OpenAiFeedbackProvider
+from app.openai.openai_method_provider import OpenAiMethodProvider
 from app.semantic_changeset_provider import SemanticChangesetProvider
 from app.azure_devops.azure_repo_changeset_provider import AzureRepoPullRequestChangesetProvider
 

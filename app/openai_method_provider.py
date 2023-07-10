@@ -30,4 +30,13 @@ class OpenAiMethodProvider(MethodProvider):
         chain = create_structured_output_chain(Methods, llm, prompt,
                                                verbose=True)
         result = chain.run(code=code_with_line_numbers)
-        return Methods.parse_obj(result)
+        methods = Methods.parse_obj(result)
+        # Remove any false detection of entire class as a method
+        # If a method contains other methods it's probably the class
+        cleansed_methods = [m for m in methods.methods
+                            if not any(n.startLine >= m.startLine
+                                       and n.endLine <= m.endLine
+                                       and n.name != m.name
+                                       for n in methods.methods)]
+        methods.methods = cleansed_methods
+        return methods

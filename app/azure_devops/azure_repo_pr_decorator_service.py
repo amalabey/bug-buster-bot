@@ -1,4 +1,5 @@
 import json
+from typing import List
 from app.azure_devops.azure_devops_client import AzureDevOpsClient
 from app.models import ReviewComment, ReviewCommentCollection
 from app.pr_decorator_service import PullRequestDecoratorService
@@ -42,9 +43,10 @@ class AzureRepoPullRequestDecoratorService(PullRequestDecoratorService):
                     })
         return payload
 
-    def annotate(self, pr_id: str, file_path: str, line_num: int, comments: ReviewCommentCollection):
+    def annotate(self, pr_id: str, file_path: str, line_num: int,
+                 comments: List[ReviewComment]):
         api_url = f"https://dev.azure.com/{self.org}/{self.project_name}/_apis/git/repositories/{self.repo_name}/pullRequests/{pr_id}/threads?api-version=6.1-preview.1"
         api = AzureDevOpsClient()
-        for comment in comments.comments:
+        for comment in comments:
             payload = self._get_comment_payload(file_path, line_num, comment)
             api.send_api_request(api_url, "POST", data=payload)

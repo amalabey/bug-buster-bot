@@ -1,9 +1,6 @@
 import argparse
 from dotenv import load_dotenv
-from app.comment_filter_service import CommentFilterService
-from app.azure_devops.azure_repo_pr_comment_loader import AzureRepoPullRequestCommentLoader
 from app.azure_devops.azure_repo_pr_decorator_service import AzureRepoPullRequestDecoratorService
-from app.chromadb_similartiy_search_service import ChromaDbSimiliaritySearchService
 from app.openai.openai_feedback_provider import OpenAiFeedbackProvider
 from app.openai.openai_method_provider import OpenAiMethodProvider
 from app.semantic_changeset_provider import SemanticChangesetProvider
@@ -34,23 +31,12 @@ changeset_provider = SemanticChangesetProvider(pr_change_provider,
                                                method_provider)
 changesets = changeset_provider.get_changesets(pr_id)
 
-comment_loader = AzureRepoPullRequestCommentLoader(az_org, az_project, pr_id)
-comment_docs = comment_loader.load()
-similarity_search_svc = ChromaDbSimiliaritySearchService()
-similarity_search_svc.load(comment_docs)
-filter_svc = CommentFilterService(similarity_search_svc)
-
 feedback_provider = OpenAiFeedbackProvider()
-pr_decorator = AzureRepoPullRequestDecoratorService(az_org, az_project,
-                                                    similarity_search_svc)
+pr_decorator = AzureRepoPullRequestDecoratorService(az_org, az_project)
 for changeset in changesets:
     feedback_list = feedback_provider.get_review_comments(changeset)
     for method, comments in feedback_list:
-        filtered_comments = filter_svc.get_filtered_comments(comments.comments,
-                                                             changeset.path,
-                                                             method.startLine,
-                                                             method.endLine)
-        if len(filtered_comments) > 0:
-            pr_decorator.annotate(pr_id, changeset.path, method.startLine,
-                                  filtered_comments)
+        pr_decorator.annotate(pr_id, changeset.path,
+                              method.startLine, method.endLine,
+                              comments.comments)
 print("Done.")
